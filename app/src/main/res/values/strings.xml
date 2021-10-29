@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ELM</string>
+    <string name="title_activity_main_menu">MainMenu</string>
+    <string name="title_home">Tentang</string>
+    <string name="title_dashboard">Prediksi</string>
+    <string name="title_notifications">Panduan</string>
+</resources>
