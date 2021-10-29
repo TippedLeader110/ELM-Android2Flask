@@ -4,8 +4,10 @@ import static android.app.Activity.RESULT_OK;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -66,6 +68,9 @@ public class PrediksiFragment extends Fragment {
     String hasilMata, hasilBody;
     ProgressDialog progress;
     Boolean alowHead, alowBody;
+    AlertDialog.Builder dialog;
+    LayoutInflater inflater;
+    View dialogView;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -82,6 +87,7 @@ public class PrediksiFragment extends Fragment {
         progress = new ProgressDialog(context);
 
         prediksi = root.findViewById(R.id.p_prediksi_start);
+        checkImg();
 
         body.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,7 +125,7 @@ public class PrediksiFragment extends Fragment {
                 RequestQueue queue = Volley.newRequestQueue(getContext());
                 String url ="http://192.168.43.90:5000/mata/";
 
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
@@ -127,10 +133,13 @@ public class PrediksiFragment extends Fragment {
                                 JSONObject jsonObject = null;
                                 try {
                                     jsonObject = new JSONObject(response);
-                                    hasilMata = jsonObject.getString("head");
-                                    hasilBody = jsonObject.getString("nody");
+                                    hasilMata = jsonObject.getString("mata");
+                                    hasilBody = jsonObject.getString("body");
+                                    int status = Integer.valueOf(jsonObject.getString("status"));
+
                                     Log.w("Head", hasilMata);
                                     Log.w("Body", hasilBody);
+                                    DialogResult(hasilBody, hasilMata, status);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -140,7 +149,8 @@ public class PrediksiFragment extends Fragment {
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        progress.dismiss();
+                        Log.w("Volley Response Error", String.valueOf(error));
                     }
                 }
                 ){
@@ -176,6 +186,38 @@ public class PrediksiFragment extends Fragment {
             prediksi.setEnabled(false);
         }
     }
+
+    private void DialogResult(String ikan, String kondisi, Integer status) {
+        dialog = new AlertDialog.Builder(getContext());
+        inflater = getLayoutInflater();
+        dialogView = inflater.inflate(R.layout.prediksi_result, null);
+        dialog.setView(dialogView);
+        dialog.setCancelable(true);
+        if(status==1){
+            dialog.setIcon(R.drawable.ic_baseline_block_24);
+        }else{
+            dialog.setIcon(R.drawable.ic_baseline_done_24);
+        }
+
+        dialog.setTitle("Hasil Prediksi");
+
+        TextView t_ikan    = (TextView) dialogView.findViewById(R.id.prediksi_r_t1);
+        TextView t_kondisi    = (TextView) dialogView.findViewById(R.id.prediksi_r_t2);
+
+        t_ikan.setText("Jenis ikan : " + ikan);
+        t_kondisi.setText("Kondisi ikan : " + kondisi);
+
+        dialog.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
