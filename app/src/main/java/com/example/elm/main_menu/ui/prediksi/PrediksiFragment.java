@@ -118,7 +118,7 @@ public class PrediksiFragment extends Fragment {
 
                 String mmata, mbody;
                 mmata = BitmapToBase64(bHead);
-                mbody = BitmapToBase64(bHead);;
+                mbody = BitmapToBase64(bBody);;
 
                 progress.setTitle("Loading !!");
                 progress.setMessage("Mengupload gambar...");
